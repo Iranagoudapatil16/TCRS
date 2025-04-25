@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flight Ticket Reservation</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f4f8;
+    }
+    .navbar-airindia {
+      background-color: #9c0024;
+      padding: 15px;
+      color: white;
+    }
+    .navbar-airindia img {
+      height: 50px;
+    }
+    .reservation-form, .confirmation-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar / Header -->
+  <div class="navbar-airindia d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <img src="maharaja_1633694839415_1633694844518.avif" alt="Air India Logo">
+      <h4 class="ms-3 mb-0">Air India - Book Your Flight</h4>
+    </div>
+    <div>
+      <strong>Fly With Pride</strong>
+    </div>
+  </div>
+
+  <!-- Reservation Form -->
+  <div class="container mt-4">
+    <div class="reservation-form" id="formSection">
+      <h4 class="mb-4">Flight Ticket Reservation</h4>
+      <form id="bookingForm">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">From Airport</label>
+            <select id="from" name="from" class="form-control" required>
+              <option value="">-- Select Departure Airport --</option>
+              <option value="BLR">Kempegowda International Airport, Bengaluru (BLR)</option>
+              <option value="IXE">Mangalore International Airport (IXE)</option>
+              <option value="HBX">Hubli Airport (HBX)</option>
+              <option value="IXG">Belgaum Airport (IXG)</option>
+              <option value="MYQ">Mysore Airport (MYQ)</option>
+              <option value="VDY">Vidyanagar Airport, Ballari (VDY)</option>
+              <option value="JLR">Jindal Vijaynagar Airport (JLR)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">To Airport</label>
+            <select id="destination" name="to" class="form-control" required>
+              <option value="">-- Select Arrival Airport --</option>
+              <option value="BLR">Kempegowda International Airport, Bengaluru (BLR)</option>
+              <option value="IXE">Mangalore International Airport (IXE)</option>
+              <option value="HBX">Hubli Airport (HBX)</option>
+              <option value="IXG">Belgaum Airport (IXG)</option>
+              <option value="MYQ">Mysore Airport (MYQ)</option>
+              <option value="VDY">Vidyanagar Airport, Ballari (VDY)</option>
+              <option value="JLR">Jindal Vijaynagar Airport (JLR)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Departure Date</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Travel Class</label>
+            <select id="class" name="class" class="form-control" required>
+              <option>Economy</option>
+              <option>Premium Economy</option>
+              <option>Business</option>
+              <option>First Class</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Number of Passengers</label>
+            <input type="number" id="tickets" name="passengers" class="form-control" min="1" max="9" required>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Passenger Name</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Enter full name" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Enter email address" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-danger mt-3">Proceed to Confirmation</button>
+      </form>
+    </div>
+
+    <!-- Confirmation Page -->
+    <div class="confirmation-section hidden" id="confirmationSection">
+      <h4 class="mb-4">Confirm Your Booking</h4>
+      <div id="confirmationDetails" class="mb-3"></div>
+      <button class="btn btn-secondary me-2" onclick="goBack()">⬅️ Back</button>
+      <button class="btn btn-success" onclick="confirmBooking()">✅ Confirm Booking</button>
+    </div>
+  </div>
+
+  <div class="text-center mt-5 mb-4">
+    <a href="index.html" class="btn btn-secondary">⬅️ Back to Home</a>
+  </div>
+
+  <script>
+    const flightPrices = {
+      'BLR-IXE': 3500, 'BLR-HBX': 3000, 'BLR-IXG': 3200,
+      'BLR-MYQ': 2500, 'BLR-VDY': 2800, 'BLR-JLR': 2900,
+      'IXE-HBX': 3400, 'IXE-IXG': 3300, 'HBX-IXG': 2700,
+      'HBX-MYQ': 2600, 'IXG-MYQ': 2900, 'VDY-JLR': 2300,
+    };
+
+    const form = document.getElementById('bookingForm');
+    const formSection = document.getElementById('formSection');
+    const confirmationSection = document.getElementById('confirmationSection');
+    const confirmationDetails = document.getElementById('confirmationDetails');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('destination').value;
+      const date = document.getElementById('date').value;
+      const travelClass = document.getElementById('class').value;
+      const tickets = document.getElementById('tickets').value;
+      const key = `${from}-${to}`;
+      const reverseKey = `${to}-${from}`;
+      const price = flightPrices[key] || flightPrices[reverseKey] || 'N/A';
+      const totalFare = price !== 'N/A' ? price * tickets : 'Not Available';
+
+      confirmationDetails.innerHTML = `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>From:</strong> ${from}</p>
+        <p><strong>To:</strong> ${to}</p>
+        <p><strong>Departure Date:</strong> ${date}</p>
+        <p><strong>Class:</strong> ${travelClass}</p>
+        <p><strong>Tickets:</strong> ${tickets}</p>
+        <p><strong>Total Fare:</strong> ₹${totalFare}</p>
+      `;
+
+      formSection.classList.add('hidden');
+      confirmationSection.classList.remove('hidden');
+    });
+
+    function goBack() {
+      confirmationSection.classList.add('hidden');
+      formSection.classList.remove('hidden');
+    }
+
+    function confirmBooking() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('destination').value;
+      const date = document.getElementById('date').value;
+      const tickets = document.getElementById('tickets').value;
+
+      const passengerDetails =
+`From: ${from}
+Destination: ${to}
+Name: ${name}
+Email: ${email}
+Date: ${date}
+Tickets: ${tickets}
+
+`;
+
+      const existingLogs = localStorage.getItem('ticketLogs') || '';
+      localStorage.setItem('ticketLogs', existingLogs + passengerDetails);
+      alert('Booking Confirmed and saved locally!');
+
+      if (!document.getElementById('downloadBtn')) {
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Download Logs';
+        downloadButton.id = 'downloadBtn';
+        downloadButton.className = 'btn btn-success mt-3';
+        downloadButton.onclick = downloadLogs;
+        confirmationSection.appendChild(downloadButton);
+      }
+    }
+
+    function downloadLogs() {
+      const logs = localStorage.getItem('ticketLogs') || 'No logs available.';
+      const blob = new Blob([logs], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'TICKETS.txt';
+      link.click();
+    }
+  </script>
+
+</body>
+</html>
